@@ -9,11 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@chakra-ui/react": "^1.8.8",
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
+    "@nivo/geo": "^0.79.1",
+    "framer-motion": "^6.3.0",
     "next": "12.1.5",
+    "nivo": "^0.31.0",
     "react": "18.0.0",
-    "react-dom": "18.0.0"
+    "react-dom": "18.0.0",
+    "recharts": "^2.1.9"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.4",
