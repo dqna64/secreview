@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import ActorsSection from '../components/ActorsSection'
+import ActionsSection from '../components/ActionsSection'
 import styles from '../styles/Home.module.css'
 
 export default function Home(props) {
@@ -16,12 +17,12 @@ export default function Home(props) {
       </Head>
 
       <main className="w-full px-4 lg:px-12 pb-16 flex flex-col grow min-h-screen max-w-screen-lg">
-        <div className="py-8 file:py-8 min-h-screen">
+        <div className="py-8">
           <h1 className="m-0 leading-tight font-sm text-4xl lg:text-6xl">
             Cybersecurity Incident Review
           </h1>
 
-          <div className="mt-8 lg:mt-[12rem] text-lg lg:text-2xl">
+          <div className="mt-4 lg:mt-8 text-lg lg:text-2xl">
             <p className="my-2">You have analysed</p>
             <p className="my-4 text-5xl lg:text-8xl">9547</p>
             {`cybersecurity incidents from 2004 to today.`}
@@ -37,6 +38,8 @@ export default function Home(props) {
           actor_motives_data={props.actor_motives_data}
           actor_countries_data={props.actor_countries_data}
         />
+
+        <ActionsSection action_types_and_varieties_data={props.action_types_and_varieties_data}/>
       </main>
 
       <footer className="w-full px-4 lg:px-12 py-4 flex flex-col border-t border-solid border-grey max-w-screen-lg">
@@ -111,13 +114,21 @@ export async function getStaticProps() {
     console.err(err)
   }
 
+  let action_types_and_varieties_data = {}
+  try {
+    const res = await fetch('http://localhost:5000/action_types_and_varieties')
+    action_types_and_varieties_data = await res.json()
+  } catch(err) {
+    console.err(err)
+  }
 
   return {
     props: {
       actor_types_data,
       actor_varieties_data,
       actor_motives_data,
-      actor_countries_data
+      actor_countries_data,
+      action_types_and_varieties_data
     },
   }
 }

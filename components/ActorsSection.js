@@ -1,4 +1,4 @@
-import { SectionContainer, SectionTitle } from '../pages/Section'
+import { SectionContainer, SectionTitle } from '../styled/Section'
 import {
   PieChart,
   Pie,
@@ -8,6 +8,9 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  LabelList,
+  Legend,
+  Cell,
 } from 'recharts'
 import styled from '@emotion/styled'
 import { useMemo } from 'react'
@@ -24,6 +27,11 @@ import {
 } from '@chakra-ui/react'
 import dynamic from 'next/dynamic'
 
+const COLORS = {
+  external: '#0088FE',
+  internal: '#00C49F',
+  partner: '#E86351',
+}
 const ActorTypeCardTitle = styled.h3`
   text-align: center;
   font-size: 1.5rem;
@@ -34,8 +42,7 @@ const ActorTypeCardPara = styled.p`
   text-align: center;
 `
 
-const MyResponsiveChoropleth = dynamic(() => import('./ResponsiveChoropleth'), {ssr:false})
-
+const MyResponsiveChoropleth = dynamic(() => import('./ResponsiveChoropleth'), { ssr: false })
 
 export default function ActorsSection({
   actor_types_data,
@@ -68,14 +75,31 @@ export default function ActorsSection({
     [internal_varieties_sorted],
   )
 
-    console.log("hfdsjfdks")
   console.log(actor_motives_data)
-  const actor_motives_sorted_arr = useMemo(
-    () => Object.entries(actor_motives_data).sort((a, b) => b[1] - a[1]),
+  const external_actor_motives_sorted_arr = useMemo(
+    () => Object.entries(actor_motives_data.external).sort((a, b) => b[1] - a[1]),
     [actor_motives_data],
   )
-
-  const actor_countries = actor_countries_data
+  const internal_actor_motives_sorted_arr = useMemo(
+    () => Object.entries(actor_motives_data.internal).sort((a, b) => b[1] - a[1]),
+    [actor_motives_data],
+  )
+  const partner_actor_motives_sorted_arr = useMemo(
+    () => Object.entries(actor_motives_data.partner).sort((a, b) => b[1] - a[1]),
+    [actor_motives_data],
+  )
+  const actor_motives_sorted_arrs = useMemo(
+    () => ({
+      external: external_actor_motives_sorted_arr,
+      internal: internal_actor_motives_sorted_arr,
+      partner: partner_actor_motives_sorted_arr,
+    }),
+    [
+      external_actor_motives_sorted_arr,
+      internal_actor_motives_sorted_arr,
+      partner_actor_motives_sorted_arr,
+    ],
+  )
 
   return (
     <SectionContainer>
@@ -142,73 +166,93 @@ export default function ActorsSection({
           </ActorTypeCardPara>
         </div>
       </div>
-      <div className="w-full h-80">
-        <ResponsiveContainer>
-          <PieChart>
+      <div className="w-full h-[40rem]">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart width={400} height={400}>
             <Pie
               data={actor_types_data}
               nameKey="actor_type"
               dataKey="count"
               cx="50%"
               cy="50%"
-              outerRadius={50}
+              outerRadius={150}
               fill="#8884d8"
-            />
+            >
+              <LabelList dataKey="actor_type" />{' '}
+              {actor_types_data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[entry.actor_type]} />
+              ))}
+            </Pie>
             <Pie
               data={actor_varieties_data}
               nameKey="actor_variety"
               dataKey="count"
               cx="50%"
               cy="50%"
-              innerRadius={60}
-              outerRadius={80}
+              innerRadius={170}
+              outerRadius={260}
               fill="#82ca9d"
-              label
-            />
+            >
+              {actor_varieties_data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[entry.actor_type]} />
+              ))}
+            </Pie>
             <Tooltip />
           </PieChart>
         </ResponsiveContainer>
       </div>
 
-      <h3 className="text-2xl">Motivations</h3>
+      <h3 className="text-4xl">Motivations</h3>
       <p>What are the motives behind threat actors committing cyber attacks?</p>
       <br />
-      <TableContainer>
-        <Table variant="simple" size="sm">
-          <TableCaption>Number of threat actors with each motive type</TableCaption>
-          <Thead>
-            <Tr>
-              <Th>Motive</Th>
-              <Th isNumeric>Number</Th>
-              <Th isNumeric>Percentage</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {actor_motives_sorted_arr.map(([motive, count]) => (
-              <Tr key={motive}>
-                <Td>{motive}</Td>
-                <Td isNumeric>{count}</Td>
-                <Td isNumeric>{`${
-                  Math.round(
-                    (10000 * count) / actor_motives_sorted_arr.reduce((sum, a) => sum + a[1], 0),
-                  ) / 100
-                }%`}</Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </TableContainer>
+      {Object.entries(actor_motives_sorted_arrs).map(([actor_type, actor_motives_sorted_arr]) => (
+        <div className="mt-6" key={actor_type}>
+          <h3 className="text-2xl">{`Top motives of ${actor_type} threat actors`}</h3>
 
-      <h3 className="text-2xl">Country</h3>
+          <TableContainer className="mt-2">
+            <Table variant="simple" size="sm">
+              <TableCaption>{`Number of ${actor_type} threat actors with each motive type`}</TableCaption>
+              <Thead>
+                <Tr>
+                  <Th>Motive</Th>
+                  <Th isNumeric>Number</Th>
+                  <Th isNumeric>Percentage</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {actor_motives_sorted_arr.map(([motive, count]) => {
+                  if (!['NA', 'Unknown'].includes(motive)) {
+                    return (
+                      <Tr key={motive}>
+                        <Td>{motive}</Td>
+                        <Td isNumeric>{count}</Td>
+                        <Td isNumeric>{`${
+                          Math.round(
+                            (10000 * count) /
+                              actor_motives_sorted_arr.reduce((sum, a) => sum + a[1], 0),
+                          ) / 100
+                        }%`}</Td>
+                      </Tr>
+                    )
+                  } else {
+                    return null
+                  }
+                })}
+              </Tbody>
+            </Table>
+          </TableContainer>
+        </div>
+      ))}
+
+      <h3 className="text-4xl">Country</h3>
       <p>Which countries do threat actors hail from?</p>
       <br />
       <div className="w-full h-80">
-      <MyResponsiveChoropleth data={actor_countries_data}/>
+        <MyResponsiveChoropleth data={actor_countries_data} />
       </div>
     </SectionContainer>
   )
 }
-
 
 // const actor_types_data = [
 //   {
