@@ -4,6 +4,8 @@ import ActorsSection from '../components/ActorsSection'
 import ActionsSection from '../components/ActionsSection'
 import styles from '../styles/Home.module.css'
 
+const URL = process.env.SECREVIEW_SERVER_URL
+
 export default function Home(props) {
   return (
     <div className="flex flex-col items-center">
@@ -61,7 +63,7 @@ export default function Home(props) {
 export async function getStaticProps() {
   let data
   try {
-    const res = await fetch('http://localhost:5000/actor_types_and_varieties')
+    const res = await fetch(`${URL}/actor_types_and_varieties`)
     data = await res.json()
     // console.log(data)
   } catch (err) {
@@ -94,7 +96,7 @@ export async function getStaticProps() {
 
   let actor_motives_data;
   try {
-    const res = await fetch('http://localhost:5000/actor_motives')
+    const res = await fetch(`${URL}/actor_motives`)
     actor_motives_data = await res.json()
 
     console.log(actor_motives_data)
@@ -104,7 +106,7 @@ export async function getStaticProps() {
 
   let actor_countries_data = {}; // Turns into []
   try {
-    const res = await fetch('http://localhost:5000/actor_countries')
+    const res = await fetch(`${URL}/actor_countries`)
     actor_countries_data = await res.json()
     actor_countries_data = Object.entries(actor_countries_data).map(country=> {
       return {id: country[0], value: country[1]}
@@ -116,7 +118,7 @@ export async function getStaticProps() {
 
   let action_types_and_varieties_data = {}
   try {
-    const res = await fetch('http://localhost:5000/action_types_and_varieties')
+    const res = await fetch(`${URL}/action_types_and_varieties`)
     action_types_and_varieties_data = await res.json()
   } catch(err) {
     console.err(err)
